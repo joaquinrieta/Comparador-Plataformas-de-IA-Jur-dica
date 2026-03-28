@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Comparador IA Jurídica · Joaquín Rieta</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f0f4f8;min-height:100vh}
+:root{--n1:#042C53;--n2:#0C447C;--n3:#E6F1FB;--n4:#85B7EB;--g1:#854F0B;--g2:#FAEEDA;--g3:#EF9F27;--g4:#BA7517}
+
+/* LOGIN */
+#login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+.login-card{width:380px;border-radius:16px;overflow:hidden;border:2px solid var(--n2);box-shadow:0 8px 32px rgba(4,44,83,.2)}
+.login-header{background:var(--n1);padding:2rem;text-align:center}
+.login-logo{display:flex;justify-content:center;margin-bottom:12px}
+.login-title{font-size:18px;font-weight:600;color:var(--n3);margin-bottom:4px}
+.login-sub{font-size:11px;color:var(--n4)}
+.login-divider{margin-top:14px;height:2px;background:linear-gradient(90deg,transparent,var(--g4),transparent)}
+.login-body{background:#fff;padding:1.75rem 2rem 2rem}
+.login-heading{font-size:13px;font-weight:500;color:#1a1a2e;margin-bottom:16px;text-align:center}
+.field-label{font-size:11px;color:#667;margin-bottom:4px}
+.login-input{width:100%;padding:9px 12px;font-size:13px;border:1px solid #cdd5e0;border-radius:8px;margin-bottom:12px;outline:none;font-family:inherit}
+.login-input:focus{border-color:var(--n2);box-shadow:0 0 0 2px rgba(12,68,124,.15)}
+.login-btn{width:100%;padding:10px;font-size:13px;font-weight:600;background:var(--n2);color:#fff;border:none;border-radius:8px;cursor:pointer;letter-spacing:.3px;font-family:inherit}
+.login-btn:hover{background:#0a3a6e}
+.login-error{font-size:12px;color:#a32d2d;text-align:center;margin-bottom:12px}
+.hint-btn{font-size:11px;color:#889;background:none;border:none;text-decoration:underline;cursor:pointer;width:100%;text-align:center;margin-top:10px;font-family:inherit}
+.hint-box{margin-top:8px;padding:8px 12px;background:#f4f6fb;border-radius:8px;font-size:11px;color:#445;text-align:center;display:none}
+
+/* APP */
+#app{display:none;max-width:1200px;margin:0 auto;padding:16px}
+.app-shell{background:var(--n1);border-radius:16px;padding:1rem;box-shadow:0 8px 32px rgba(4,44,83,.2)}
+.app-header{display:flex;align-items:center;justify-content:space-between;padding-bottom:12px;border-bottom:1px solid rgba(133,183,235,.25);margin-bottom:1rem;flex-wrap:wrap;gap:10px}
+.app-logo{display:flex;align-items:center;gap:12px}
+.app-title{font-weight:600;font-size:15px;color:var(--n3)}
+.app-sub{font-size:10px;color:var(--n4)}
+.app-header-right{display:flex;align-items:center;gap:14px}
+.author-name{font-size:12px;font-weight:600;color:var(--g3)}
+.author-web{font-size:10px;color:var(--n4);text-decoration:none}
+.author-web:hover{text-decoration:underline}
+.header-divider{width:1px;height:28px;background:rgba(133,183,235,.3)}
+.header-btn{font-size:11px;padding:5px 10px;color:var(--n4);background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);border-radius:8px;cursor:pointer;font-family:inherit}
+.header-btn:hover{background:rgba(255,255,255,.15)}
+.analyze-btn{font-size:11px;padding:5px 12px;background:var(--g2);color:var(--g1);border:1px solid var(--g4);border-radius:8px;cursor:pointer;font-weight:600;font-family:inherit;display:none}
+.analyze-btn:hover{background:#f0d8b0}
+
+/* TABS */
+.tabs{display:flex;border-bottom:1px solid rgba(133,183,235,.25);margin-bottom:1rem;align-items:center}
+.tab-btn{padding:8px 16px;background:none;border:none;border-bottom:3px solid transparent;margin-bottom:-1px;color:rgba(255,255,255,.75);cursor:pointer;font-size:12px;font-family:inherit;transition:color .15s}
+.tab-btn:hover{color:rgba(255,255,255,.95)}
+.tab-btn.active{color:var(--g3);font-weight:600;border-bottom:3px solid var(--g3)}
+.cmp-indicator{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:11px;color:var(--g3);padding-right:4px}
+.cmp-dot{width:6px;height:6px;border-radius:50%;background:var(--g3)}
+.clear-cmp{font-size:10px;color:rgba(255,255,255,.5);background:none;border:none;text-decoration:underline;cursor:pointer;font-family:inherit}
+
+/* CONTENT */
+.content{background:#fff;border-radius:12px;padding:1.25rem}
+
+/* FILTERS */
+.filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:1rem}
+.filters select{font-size:12px;padding:5px 10px;border:1px solid #cdd5e0;border-radius:6px;background:#fff;color:#333;cursor:pointer;outline:none;font-family:inherit}
+.filters select:focus{border-color:var(--n2)}
+.filter-count{font-size:11px;color:#667}
+.clear-filters{font-size:11px;padding:4px 8px;background:transparent;border:1px solid #dde3ee;border-radius:6px;cursor:pointer;color:#667;font-family:inherit}
+.cmp-banner{display:none;margin-bottom:1rem;padding:9px 14px;background:var(--g2);border:1px solid var(--g4);border-radius:8px;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.cmp-banner-text{font-size:12px;color:var(--g1);font-weight:600}
+.cmp-go-btn{font-size:12px;padding:5px 14px;background:var(--n2);color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-family:inherit}
+
+/* GRID */
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+.span-full{grid-column:1/-1;text-align:center;padding:2.5rem;color:#667;font-size:13px}
+
+/* CARD */
+.card{background:#fff;border:1px solid #dde3ee;border-radius:12px;display:flex;flex-direction:column;transition:border-color .15s;cursor:default}
+.card.expanded{border-color:var(--n2);border-left:4px solid var(--n2)}
+.card.in-compare{border:2px solid var(--g4);border-left:4px solid var(--g4)}
+.card-body{padding:1.1rem;display:flex;flex-direction:column;gap:9px;flex:1}
+.card-header{display:flex;gap:10px;align-items:flex-start}
+.card-initials{width:40px;height:40px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700}
+.card-name{font-weight:700;font-size:13px;color:#1a1a2e;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card-product{font-size:10px;color:#667;margin-top:1px}
+.latam-badge{font-size:9px;font-weight:700;padding:2px 5px;border-radius:4px;background:#EAF3DE;color:#27500A;flex-shrink:0;align-self:flex-start}
+.price-row{display:flex;align-items:center;justify-content:space-between;background:#f4f6fb;border-radius:8px;padding:5px 9px}
+.price-main{font-weight:700;font-size:11px;color:#1a1a2e}
+.price-trial{font-size:9px;color:#889}
+.highlight-badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;align-self:flex-start;white-space:nowrap}
+.card-tagline{font-size:11px;color:#445;line-height:1.5}
+.mini-features{display:flex;flex-direction:column;gap:4px}
+.mini-feat-row{display:flex;align-items:center;justify-content:space-between;gap:6px}
+.mini-feat-label{font-size:10px;color:#667;white-space:nowrap}
+.dots{display:flex;gap:3px;align-items:center}
+.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.dot.on{background:#1a4a8a}
+.dot.off{background:#cdd5e0;opacity:.4}
+.card-footer{padding:7px 10px;border-top:1px solid #eaeff7;display:flex;gap:6px}
+.detail-btn{flex:1;font-size:11px;padding:5px 0;background:transparent;color:#445;border:1px solid #dde3ee;border-radius:6px;cursor:pointer;font-family:inherit}
+.detail-btn.active{background:var(--n1);color:#fff;border-color:var(--n2);font-weight:600}
+.compare-btn{font-size:11px;padding:5px 10px;background:transparent;color:#445;border:1px solid #dde3ee;border-radius:6px;cursor:pointer;font-family:inherit}
+.compare-btn.active{background:var(--g2);color:var(--g1);border-color:var(--g4);font-weight:600}
+.compare-btn:disabled{opacity:.35;cursor:not-allowed}
+
+/* DETAIL */
+.detail-panel{background:#fff;border:1px solid var(--n2);border-left:4px solid var(--n2);border-radius:12px;padding:1.5rem;margin:4px 0;grid-column:1/-1}
+.detail-header{display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;margin-bottom:16px}
+.detail-initials{width:48px;height:48px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0}
+.detail-name{font-weight:700;font-size:17px;color:#1a1a2e;margin-bottom:2px}
+.detail-product{font-size:12px;color:#667}
+.detail-price-block{text-align:right;flex-shrink:0;margin-left:auto}
+.detail-price-main{font-weight:700;font-size:14px;color:#1a1a2e}
+.detail-price-note{font-size:10px;color:#889;max-width:240px;margin-top:3px;line-height:1.4}
+.detail-source{font-size:10px;color:var(--n2);margin-top:3px;display:block}
+.detail-close{font-size:11px;padding:4px 10px;background:transparent;border:1px solid #dde3ee;border-radius:6px;cursor:pointer;color:#667;font-family:inherit;flex-shrink:0}
+.detail-divider{height:1px;background:#eaeff7;margin-bottom:16px}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.section-label{font-size:10px;font-weight:700;margin-bottom:10px;letter-spacing:.8px}
+.feat-row{display:flex;gap:7px;margin-bottom:7px}
+.feat-icon{font-size:11px;flex-shrink:0;font-weight:700;margin-top:1px;width:12px}
+.feat-icon.plus{color:#27500A}
+.feat-icon.minus{color:#a32d2d}
+.feat-text{font-size:11px;color:#2a2a3e;line-height:1.5}
+.tech-box{background:#f4f6fb;border-radius:8px;padding:12px 14px}
+.tech-item{margin-bottom:8px}
+.tech-label{font-size:10px;color:#889;display:block;margin-bottom:2px}
+.tech-value{font-size:11px;color:#1a1a2e;line-height:1.4}
+.product-item{display:flex;gap:7px;margin-bottom:6px}
+.product-arrow{color:#889;font-size:11px;flex-shrink:0}
+.product-text{font-size:11px;color:#1a1a2e;line-height:1.4}
+.caps-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:4px}
+.cap-cell{background:#f4f6fb;border-radius:8px;padding:7px 9px}
+.cap-label{font-size:10px;color:#556;margin-bottom:5px}
+
+/* PRICE LEGEND */
+.price-legend{margin-top:1.25rem;display:flex;gap:16px;flex-wrap:wrap;font-size:10px;color:#889;align-items:center}
+.legend-confirmed{color:#27500A;font-weight:700}
+.legend-est{color:#633806;font-weight:700}
+.legend-author{margin-left:auto}
+
+/* CHARTS TAB */
+.chart-selector{background:#f0f4fb;border-radius:12px;padding:1rem 1.25rem;margin-bottom:20px}
+.chart-selector-label{font-size:11px;font-weight:700;color:#556;margin-bottom:10px;letter-spacing:.7px}
+.chart-selector-btns{display:flex;flex-wrap:wrap;gap:8px}
+.cs-btn{font-size:11px;padding:5px 12px;background:#fff;color:#556;border:1px solid #cdd5e0;border-radius:8px;cursor:pointer;font-family:inherit}
+.cs-btn.active{font-weight:700}
+.chart-card{background:#fff;border:1px solid #dde3ee;border-radius:12px;padding:1.25rem;margin-bottom:20px}
+.chart-card-title{font-size:14px;font-weight:700;color:#1a1a2e;margin-bottom:3px}
+.chart-card-sub{font-size:11px;color:#889;margin-bottom:14px}
+.chart-accent-left{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.accent-bar{width:3px;height:18px;border-radius:2px}
+.radar-info{background:#fff;border:1px solid var(--n2);border-left:4px solid var(--n2);border-radius:12px;padding:1.25rem;margin-bottom:20px}
+.radar-info-title{font-size:14px;font-weight:700;color:#1a1a2e;margin-bottom:10px}
+.radar-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:11px;color:#445;line-height:1.6}
+.radar-info-item{display:flex;gap:8px}
+.radar-num{color:var(--n2);font-weight:700;flex-shrink:0}
+.cap-table{width:100%;border-collapse:collapse;min-width:300px}
+.cap-table th{padding:8px 10px;font-size:10px;font-weight:700;letter-spacing:.6px;color:#889}
+.cap-table th.name-col{text-align:left;width:130px}
+.cap-table th.data-col{text-align:center}
+.cap-table td{padding:9px 10px;font-size:11px;border-bottom:.5px solid #eaeff7}
+.cap-table td.name-cell{color:#445}
+.cap-table tr:nth-child(even){background:#f4f6fb}
+.bar-legend{display:flex;gap:16px;margin-top:8px}
+.bar-legend-item{display:flex;gap:5px;align-items:center;font-size:10px;color:#889}
+.bar-legend-dot{width:12px;height:12px;border-radius:2px}
+.chart-canvas-wrap{position:relative;width:100%;height:300px}
+
+/* SOURCES TAB */
+.sources-section{background:#fff;border:1px solid #dde3ee;border-radius:12px;padding:1.5rem;margin-bottom:20px}
+.sources-section.blue-accent{border-color:var(--n2);border-left:4px solid var(--n2)}
+.sources-title{font-size:14px;font-weight:700;color:#1a1a2e;margin-bottom:12px}
+.sources-text{font-size:12px;color:#445;line-height:1.7;margin-bottom:12px}
+.method-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:11px;color:#556}
+.method-item{display:flex;gap:8px}
+.method-key{font-weight:700;color:#1a1a2e;min-width:80px}
+.source-row{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-top:.5px solid #eaeff7}
+.source-initials{width:32px;height:32px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700}
+.source-name{font-weight:700;font-size:12px;color:#1a1a2e;margin-bottom:2px}
+.source-url{font-size:11px;color:var(--n2);text-decoration:none}
+.source-url:hover{text-decoration:underline}
+.source-meta{font-size:10px;color:#889;margin-top:2px}
+.legal-header{display:flex;gap:14px;align-items:flex-start;margin-bottom:14px}
+.legal-icon{width:36px;height:36px;border-radius:8px;background:var(--n1);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px;font-weight:700;color:var(--g3)}
+.legal-icon-title{font-size:13px;font-weight:700;color:#1a1a2e;margin-bottom:2px}
+.legal-icon-sub{font-size:10px;color:#889}
+.legal-point{font-size:11px;color:#445;line-height:1.7;margin-bottom:10px}
+.legal-strong{color:#1a1a2e;font-weight:700}
+.author-card{background:#fff;border:1px solid #dde3ee;border-radius:12px;padding:1rem 1.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.author-avatar{width:42px;height:42px;border-radius:50%;background:var(--n1);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;font-weight:700;color:var(--g3)}
+.author-info{display:flex;gap:12px;align-items:center}
+.author-full-name{font-weight:700;font-size:13px;color:#1a1a2e}
+.author-role{font-size:11px;color:#667}
+.author-links{text-align:right}
+.author-site{font-size:12px;color:var(--n2);text-decoration:none;font-weight:700;display:block}
+.author-date{font-size:10px;color:#889;margin-top:2px}
+/* HELP TAB */
+.help-hero{background:var(--n1);border-radius:12px;padding:1.5rem;margin-bottom:20px;display:flex;align-items:center;gap:16px}
+.help-hero-text{color:var(--n3)}
+.help-hero-title{font-size:16px;font-weight:700;margin-bottom:4px}
+.help-hero-sub{font-size:12px;color:var(--n4);line-height:1.6}
+.help-steps{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;margin-bottom:20px}
+.help-step{background:#fff;border:1px solid #dde3ee;border-radius:12px;padding:1.1rem}
+.step-num{width:28px;height:28px;border-radius:50%;background:var(--n1);color:var(--g3);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-bottom:10px}
+.step-title{font-size:13px;font-weight:700;color:#1a1a2e;margin-bottom:5px}
+.step-body{font-size:11px;color:#445;line-height:1.6}
+.step-tip{display:inline-block;margin-top:6px;font-size:10px;background:var(--g2);color:var(--g1);border:1px solid var(--g4);border-radius:6px;padding:2px 7px;font-weight:600}
+.help-section{background:#fff;border:1px solid #dde3ee;border-radius:12px;padding:1.25rem;margin-bottom:14px}
+.help-section.accent{border-color:var(--n2);border-left:4px solid var(--n2)}
+.help-section-title{font-size:13px;font-weight:700;color:#1a1a2e;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.help-section-icon{width:22px;height:22px;border-radius:6px;background:var(--n1);color:var(--g3);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.help-qa{margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #eaeff7}
+.help-qa:last-child{margin-bottom:0;padding-bottom:0;border-bottom:none}
+.help-q{font-size:12px;font-weight:700;color:#1a1a2e;margin-bottom:4px;display:flex;gap:7px}
+.help-q-icon{color:var(--n2);flex-shrink:0}
+.help-a{font-size:11px;color:#445;line-height:1.6;padding-left:17px}
+.help-shortcut-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.shortcut-item{display:flex;align-items:center;gap:8px;font-size:11px;color:#445}
+.shortcut-key{background:#f4f6fb;border:1px solid #dde3ee;border-radius:5px;padding:2px 8px;font-size:10px;font-weight:700;color:#1a1a2e;white-space:nowrap}
+.help-legend-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}
+.legend-item{display:flex;align-items:flex-start;gap:8px;padding:8px 10px;background:#f4f6fb;border-radius:8px}
+.legend-badge{font-size:10px;font-weight:700;white-space:nowrap;padding:2px 7px;border-radius:6px;flex-shrink:0}
+.legend-desc{font-size:11px;color:#445;line-height:1.5}{.two-col{grid-template-columns:1fr}.radar-info-grid{grid-template-columns:1fr}.method-grid{grid-template-columns:1fr}.caps-grid{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-header">
+      <div class="login-logo">
+        <svg width="44" height="44" viewBox="0 0 28 28" fill="none">
+          <rect x="13" y="1" width="2" height="25" rx="1" fill="#EF9F27"/>
+          <rect x="0" y="9" width="28" height="2" rx="1" fill="#EF9F27"/>
+          <rect x="7" y="26" width="14" height="2" rx="1" fill="#EF9F27"/>
+          <path d="M 7 11 L 3 20 L 11 20 Z" fill="none" stroke="#EF9F27" stroke-width="1.5" stroke-linejoin="round"/>
+          <path d="M 21 11 L 17 20 L 25 20 Z" fill="none" stroke="#EF9F27" stroke-width="1.5" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="login-title">Comparador IA Jurídica</div>
+      <div class="login-sub">España · LATAM · Datos verificados marzo 2026</div>
+      <div class="login-divider"></div>
+    </div>
+    <div class="login-body">
+      <div class="login-heading">Acceso profesional</div>
+      <div class="field-label">Usuario</div>
+      <input class="login-input" id="login-user" placeholder="Usuario" autocomplete="off" value="legal">
+      <div class="field-label">Contraseña</div>
+      <input class="login-input" id="login-pass" placeholder="Contraseña" value="2026">
+      <div class="login-error" id="login-err" style="display:none"></div>
+      <button class="login-btn" onclick="doLogin()">Acceder</button>
+      <div style="margin-top:18px;padding-top:14px;border-top:1px solid #eaeff7;text-align:center">
+        <div style="font-size:10px;color:#aaa;margin-bottom:4px;letter-spacing:.4px;text-transform:uppercase">Elaborado por</div>
+        <div style="font-size:12px;font-weight:600;color:#1a1a2e;margin-bottom:3px">Joaquín Rieta Carbonell</div>
+        <a href="https://joaquinrieta.com" target="_blank" style="font-size:11px;color:#0C447C;text-decoration:none">joaquinrieta.com</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="app-shell">
+    <div class="app-header">
+      <div class="app-logo">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+          <rect x="13" y="1" width="2" height="25" rx="1" fill="#EF9F27"/>
+          <rect x="0" y="9" width="28" height="2" rx="1" fill="#EF9F27"/>
+          <rect x="7" y="26" width="14" height="2" rx="1" fill="#EF9F27"/>
+          <path d="M 7 11 L 3 20 L 11 20 Z" fill="none" stroke="#EF9F27" stroke-width="1.5" stroke-linejoin="round"/>
+          <path d="M 21 11 L 17 20 L 25 20 Z" fill="none" stroke="#EF9F27" stroke-width="1.5" stroke-linejoin="round"/>
+        </svg>
+        <div>
+          <div class="app-title">Comparador IA Jurídica</div>
+          <div class="app-sub">España · LATAM · Datos verificados · Marzo 2026</div>
+        </div>
+      </div>
+      <div class="app-header-right">
+        <div>
+          <div class="author-name">Joaquín Rieta</div>
+          <a href="https://joaquinrieta.com" target="_blank" class="author-web">joaquinrieta.com</a>
+        </div>
+        <div class="header-divider"></div>
+        <button class="analyze-btn" id="analyze-btn" onclick="goToCharts()">Ver análisis →</button>
+        <button class="header-btn" onclick="doLogout()">Salir</button>
+      </div>
+    </div>
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('comparador',this)">Comparador</button>
+      <button class="tab-btn" onclick="switchTab('graficos',this)">Análisis gráfico</button>
+      <button class="tab-btn" onclick="switchTab('fuentes',this)">Fuentes y metodología</button>
+      <button class="tab-btn" onclick="switchTab('ayuda',this)">? Ayuda</button>
+      <div class="cmp-indicator" id="cmp-indicator" style="display:none">
+        <div class="cmp-dot"></div>
+        <span id="cmp-count">0</span> seleccionada(s)
+        <button class="clear-cmp" onclick="clearCompare()">Limpiar</button>
+      </div>
+    </div>
+    <div class="content">
+      <div id="tab-comparador"></div>
+      <div id="tab-graficos" style="display:none"></div>
+      <div id="tab-fuentes" style="display:none"></div>
+      <div id="tab-ayuda" style="display:none"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────
+const PC={
+  blue:{bg:"#E6F1FB",text:"#0C447C",bd:"#85B7EB"},
+  teal:{bg:"#E1F5EE",text:"#085041",bd:"#5DCAA5"},
+  purple:{bg:"#EEEDFE",text:"#3C3489",bd:"#AFA9EC"},
+  coral:{bg:"#FAECE7",text:"#712B13",bd:"#F0997B"},
+  pink:{bg:"#FBEAF0",text:"#72243E",bd:"#ED93B1"},
+  green:{bg:"#EAF3DE",text:"#27500A",bd:"#97C459"},
+  amber:{bg:"#FAEEDA",text:"#633806",bd:"#EF9F27"},
+  gray:{bg:"#F1EFE8",text:"#444441",bd:"#B4B2A9"}
+};
+const CC={aranzadi:"#378ADD",lefebvre:"#1D9E75",tirant:"#7F77DD",vlex:"#D85A30",maite:"#D4537E",prudencia:"#639922",bigle:"#EF9F27",iberley:"#888780"};
+const FM=[
+  {key:"investigacion",label:"Investigación"},
+  {key:"redaccion",label:"Redacción"},
+  {key:"prediccion",label:"Predicción"},
+  {key:"contratos",label:"Contratos"},
+  {key:"multimodal",label:"Audio/Vídeo"},
+  {key:"personalizacion",label:"Personaliz."},
+  {key:"latamCoverage",label:"LATAM"},
+  {key:"api",label:"API"}
+];
+const PLATFORMS=[
+  {id:"aranzadi",name:"Aranzadi LA LEY",short:"Aranzadi",product:"K+ · Jurimetría",initials:"AL",color:"blue",
+   priceDisplay:"One: 117 €/mes ✓",priceNote:"Aranzadi One desde 117 €/mes (1 usuario) ✓ OFICIAL. K+: estimado 200-300 €/mes (sin tarifa pública). DocAnalyzer y Jurimetría: presupuesto bajo proyecto.",
+   priceMin:117,priceMax:300,latam:false,trial:"Demo comercial",highlight:"Jurimetría predictiva",
+   profiles:["litigacion","grandes","mediano"],
+   llm:"Azure OpenAI (Microsoft) · ENS categoría alta",
+   baseData:"Mayor fondo España: legislación + 100% sentencias analizadas + doctrina. 23.000+ clientes.",
+   compliance:"RGPD · LOPDGDD · AI Act · ENS alta · Azure",
+   sourceUrl:"https://www.aranzadilaley.es",
+   features:{investigacion:5,redaccion:4,prediccion:5,contratos:4,multimodal:1,personalizacion:3,latamCoverage:1,api:5},
+   strengths:["Jurimetría: predicción cuantitativa del resultado de litigios con toda la jurisprudencia española","K+: 9 idiomas incl. catalán, euskera y gallego — único en el mercado. Complemento para Outlook.","DocAnalyzer: 8,9/10 satisfacción · 140+ proyectos/año · integración API","Aranzadi One: precio publicado más bajo del mercado editorial (117 €/mes)"],
+   weaknesses:["Sin presencia en Latinoamérica — mercado exclusivamente español y europeo","K+ sin precio público — solo propuesta comercial. La más cara entre los grandes editores.","Aranzadi One y K+ IA avanzada son módulos distintos — la IA conversacional es módulo adicional"],
+   products:["Aranzadi One — 117 €/mes ✓ (1 usuario: base datos + gestión + LexNET)","K+ — asistente conversacional IA (Azure OpenAI, feb. 2025) · 9 idiomas","Jurimetría — predicción cuantitativa de litigios","DocAnalyzer — digitalización masiva · integración API","ContractBOX — gestión de contratos y plantillas"]},
+  {id:"lefebvre",name:"Lefebvre",short:"Lefebvre",product:"GenIA-L · GenIA-L Deep",initials:"LF",color:"teal",
+   priceDisplay:"Sin tarifa pública",priceNote:"Lefebvre NO publica tarifas. Estimación: 80-150 €/mes sobre NEO/QMemento. 30.000+ clientes: Endesa, CaixaBank, LaLiga, ICAM, Agencia Tributaria.",
+   priceMin:80,priceMax:150,latam:false,trial:"Demo gratuita personalizada",highlight:"1ª en Europa · ISO 42001",
+   profiles:["autonomo","pequeno","mediano"],
+   llm:"Tecnología Deep multiagente propia (LLM no especificado públicamente)",
+   baseData:"NEO + QMemento + Mementos (33 años doctrina editorial). Actualización diaria.",
+   compliance:"ISO 42001 ✓ · ISO 27001 ✓ · ISO 9001 ✓ · ENS ✓ · GDPR",
+   sourceUrl:"https://lefebvre.es/genia-l/",
+   features:{investigacion:4,redaccion:5,prediccion:2,contratos:4,multimodal:1,personalizacion:4,latamCoverage:1,api:3},
+   strengths:["Certificaciones líderes: ISO 42001 (IA), ISO 27001, ISO 9001 y ENS — ningún competidor las iguala","Primera IA generativa legal en Europa (sept. 2023). 30.000+ clientes.","Chat unificado multiagente: consulta + argumenta + redacta + revisa + analiza","GenIA-L Deep: razonamiento profundo con autoevaluación de inconsistencias"],
+   weaknesses:["Solo Europa — sin presencia ni contenido en LATAM","Precios no publicados. Requiere suscripción NEO/QMemento de base.","LLM subyacente no especificado en fuentes públicas"],
+   products:["GenIA-L Chat unificado (5 modos en un entorno)","GenIA-L Deep — razonamiento profundo","GenIA-L Docs+ — análisis de hasta 10 documentos simultáneos","GenIA-L Juris — informes doctrina administrativa estructurados","Workflows guiados legales paso a paso"]},
+  {id:"tirant",name:"Tirant lo Blanch",short:"Tirant",product:"SOFIA 3.0",initials:"TB",color:"purple",
+   priceDisplay:"Sin tarifa pública",priceNote:"Tirant NO publica tarifas. SOFIA 3.0 requiere módulo IA adicional sobre PRIME. Estimación: 100-150 €/mes.",
+   priceMin:100,priceMax:150,latam:true,trial:"Demo gratuita",highlight:"Líder LATAM · SOFIA 3.0",
+   profiles:["autonomo","pequeno","latam","mediano"],
+   llm:"IA propia entrenada en contenido Tirant (CSIC: editorial más prestigiosa en español)",
+   baseData:"Biblioteca Virtual Tirant (mayor de España). Contenido nativo en 8 países LATAM. Analytics desde 2018.",
+   compliance:"RGPD · AI Act · encriptación avanzada · política zero-retention declarada",
+   sourceUrl:"https://tirantprimeconversa.tirant.com/",
+   features:{investigacion:4,redaccion:4,prediccion:4,contratos:3,multimodal:2,personalizacion:3,latamCoverage:5,api:3},
+   strengths:["SOFIA 3.0 (feb. 2026): IA conversacional + analítica unificada, sin límite de extensión","Presencia LATAM nativa: México, Colombia, Chile, Perú (2025), Brasil, CR, El Salvador — equipos locales","Tirant Analytics: predicción judicial desde 2018 — pionero absoluto en España","T-Conecta: marketing jurídico con IA generativa — único en el mercado mundial"],
+   weaknesses:["Precios no publicados — SOFIA 3.0 requiere módulo IA adicional específico","Sin certificaciones ISO publicadas (vs. Lefebvre con ISO 42001/27001/9001)","SOFIA 3.0 no disponible para todos los usuarios de PRIME"],
+   products:["SOFIA 3.0 — IA unificada conversacional + analítica (feb. 2026)","Tirant Analytics — predicción judicial (desde 2018, pionero)","T-Conecta — marketing jurídico IA (único en el mercado)","Redactor Pro — documentos con inserción de cláusulas","Tirant eGob — IA para Administración Pública (20 proyectos, 23 países)"]},
+  {id:"vlex",name:"vLex",short:"vLex",product:"Vincent AI · vLex España",initials:"vL",color:"coral",
+   priceDisplay:"Pro: 54 €/mes ✓ · Premium: 166 €/mes ✓",priceNote:"Planes España CONFIRMADOS: Pro 54 €/mes ✓, Plus 120 €/mes ✓, Premium 166 €/mes ✓. Plan Open gratuito. Full Tech AI global: ~565 €/mes. Adquirida por Clio por 1.000 M$ (jun. 2025).",
+   priceMin:54,priceMax:566,latam:true,trial:"Plan Open gratuito (búsquedas ilimitadas)",highlight:"Desde 54 €/mes ✓ · audio/vídeo",
+   profiles:["internacional","grandes","litigacion","pequeno"],
+   llm:"Multi-modelo (selección automática) + plataforma Iceberg AI propia",
+   baseData:"+1.000M docs en 100+ países. España: 20M+ docs. 3,67× más fiable que LLMs genéricos.",
+   compliance:"RGPD · AI Act · política no entrenamiento con datos del cliente",
+   sourceUrl:"https://vlex.es/",
+   features:{investigacion:5,redaccion:3,prediccion:3,contratos:4,multimodal:5,personalizacion:4,latamCoverage:4,api:5},
+   strengths:["Planes España desde 54 €/mes ✓ — la entrada editorial más económica del mercado","Único en análisis multimodal: transcripción de vistas judiciales (audio/vídeo) — desde ene. 2025","Vincent AI: 3,67× más fiable que LLMs genéricos. +38% productividad.","Plan Open gratuito con búsquedas ilimitadas. Adquirida por Clio por 1.000 M$."],
+   weaknesses:["Vincent AI completo requiere plan Premium (166 €) o superior","Menor profundidad en contenido editorial español vs. Aranzadi/Lefebvre/Tirant","Plan Full Tech AI global (~565 €/mes) necesario para acceso internacional avanzado"],
+   products:["Plan Open — gratuito ✓ (búsquedas ilimitadas + 10 alertas)","Plan Pro — 54 €/mes ✓ (legislación + jurisprudencia)","Plan Plus — 120 €/mes ✓ (+ formularios + biblioteca)","Plan Premium — 166 €/mes ✓ (+ Analytics + Vincent AI completo)","Vincent Studio — workflows personalizados sin código"]},
+  {id:"maite",name:"Maite.ai",short:"Maite.ai",product:"Copiloto jurídico",initials:"MA",color:"pink",
+   priceDisplay:"Plus: 100 €/mes ✓ · Teams: 175 €/mes ✓",priceNote:"CONFIRMADOS maite.ai/precios: Plus 100 €/mes (1 usuario), -20% anual=80 €/mes. Teams 175 €/mes (2 usu.) +50 €/mes por usuario hasta 5. Adquirida por Doctrine (Grupo Lefebvre Francia) feb. 2026.",
+   priceMin:80,priceMax:175,latam:false,trial:"20 interacciones gratuitas (sin tarjeta)",highlight:"Precios 100% públicos ✓",
+   profiles:["autonomo","pequeno"],
+   llm:"Multi-modelo: OpenAI + Anthropic + Google · servidores en Europa",
+   baseData:"+3M docs: BOE diario + 2M+ sentencias + DGT/TEAC/AEPD/CNMC/DGSJFP/ITSS",
+   compliance:"RGPD · SOC 2 ✓ · AES-256 · TLS 1.2+ · No entrena con datos del cliente",
+   sourceUrl:"https://www.maite.ai/precios/",
+   features:{investigacion:3,redaccion:4,prediccion:1,contratos:3,multimodal:1,personalizacion:5,latamCoverage:1,api:3},
+   strengths:["Único con precios 100% públicos y transparentes. Auto-contratación online, sin permanencia.","Multi-modelo (OpenAI + Anthropic + Google). No entrena con datos. Servidores en Europa. SOC 2.","Biblioteca del despacho (Teams/A Medida): aprende estilo, plantillas y especialidad del equipo","OCR integrado: PDF, DOCX, TXT, imágenes hasta 50 MB. Múltiples docs por chat."],
+   weaknesses:["Solo España — sin LATAM ni cobertura internacional","Biblioteca del despacho solo en Teams y A Medida (no en Plus individual)","Base documental más pequeña que los grandes editores históricos"],
+   products:["Maite Plus — 100 €/mes ✓ (80 €/mes anual) · 1 usuario · ilimitado","Maite Teams — 175 €/mes ✓ (2 usuarios) +50 €/mes por usuario hasta 5","Maite A Medida — usuarios ilimitados · API · SLA ≥99,9% · formación certificada","Biblioteca del despacho — Teams/A Medida (plantillas + jurisprudencia interna)","Razonamiento legal 99/100 — mejor puntuación en test acceso judicatura"]},
+  {id:"prudencia",name:"Prudencia.ai",short:"Prudencia",product:"Copiloto jurídico · TEMIS",initials:"PR",color:"green",
+   priceDisplay:"Starter: 69 €/mes ✓ (1-5 usuarios)",priceNote:"CONFIRMADO (Confilegal, feb. 2026): Plan Starter 69 €/mes (1-5 usuarios). Usuarios adicionales: 59 €/mes. A Medida: bajo consulta. Versión gratuita para ciudadanos. Lanzada feb. 2026.",
+   priceMin:59,priceMax:69,latam:false,trial:"Versión gratuita básica (ciudadanos)",highlight:"Precio más bajo: 69 €/mes ✓",
+   profiles:["autonomo","pequeno","publico"],
+   llm:"Modelos múltiples + capa propia de conocimiento y control jurídico",
+   baseData:"Derecho español + UE. Base cerrada y estructurada. Origen: sistema TEMIS (Abogacía Gral. del Estado).",
+   compliance:"RGPD · LOPDGDD · TLS 1.3+ · AES-256-GCM · AI Act (control humano)",
+   sourceUrl:"https://prudencia.ai/",
+   features:{investigacion:3,redaccion:3,prediccion:1,contratos:2,multimodal:3,personalizacion:3,latamCoverage:1,api:2},
+   strengths:["Precio más bajo del mercado: 69 €/mes para hasta 5 usuarios — sin equivalente","Fundada por abogados (Carlos Guerrero + Jaume Bosch CTO): diseñada desde la práctica real","No inventa cuando no hay base jurídica clara. Control humano explícito. Audio MP3/MP4.","Expedientes compartidos. Base de conocimiento privada del despacho."],
+   weaknesses:["Lanzada feb. 2026 — solo 2 meses de operación. Ecosistema documental en construcción.","Solo derecho español + UE. Sin LATAM ni cobertura internacional.","Plan Starter con carga limitada de documentos (número exacto no publicado)"],
+   products:["Plan Starter — 69 €/mes ✓ (1-5 usuarios: bases jurídicas + conversaciones + audio)","Plan A Medida — consultar (API + despliegue + soporte 24/7)","Orientación jurídica gratuita — freemium para ciudadanos","Expedientes compartidos entre usuarios del equipo","Base de conocimiento privada del despacho"]},
+  {id:"bigle",name:"Bigle Legal",short:"Bigle",product:"CLM + Libra IA",initials:"BG",color:"amber",
+   priceDisplay:"Sin tarifa pública · cotización",priceNote:"Bigle NO publica tarifas. Estimación desde ~200 €/mes. Premium y Enterprise a medida. Subvención CDTI 400.000 € para la IA discriminativa.",
+   priceMin:200,priceMax:999,latam:false,trial:"Demo bajo solicitud",highlight:"Especialista CLM · contratos",
+   profiles:["corporativo","grandes"],
+   llm:"Libra IA (discriminativa + generativa) — desarrollada con Eurecat, subvención CDTI 400.000 €",
+   baseData:"Sin base jurisprudencial — foco exclusivo en contratos propios del cliente.",
+   compliance:"RGPD · subvención CDTI · certificaciones Eurecat · API/Webhooks",
+   sourceUrl:"https://www.bigle.legal/",
+   features:{investigacion:1,redaccion:4,prediccion:1,contratos:5,multimodal:1,personalizacion:4,latamCoverage:1,api:5},
+   strengths:["Única suite CLM end-to-end en España: automatización del ciclo de vida contractual","IA discriminativa (Eurecat + CDTI): detección automática de cláusulas y riesgo contractual","92% ahorro de costes por contrato · 95% reducción criticidad legal · 20× más rápido","Bigle Sign: firma electrónica biométrica avanzada integrada nativa"],
+   weaknesses:["Sin base de datos jurisprudencial — no sirve para investigación ni litigación","Orientada exclusivamente a gestión contractual corporativa","Sin LATAM. Precio completamente opaco."],
+   products:["Bigle CLM — gestión end-to-end ciclo de vida contractual (no-code)","Bigle Libra — IA discriminativa y generativa para contratos","Bigle Sign — firma electrónica biométrica avanzada","Bigle Academy — plataforma e-learning para equipo jurídico","API/Webhooks — integración con ERP, DMS y sistemas externos"]},
+  {id:"iberley",name:"Iberley IA",short:"Iberley",product:"Copiloto GPT legal",initials:"IB",color:"gray",
+   priceDisplay:"Demo 7 días sin tarjeta ✓",priceNote:"Demo gratuita 7 días completa sin tarjeta. Precio suscripción: estimado ~129 €/mes (sin tarifa publicada). 5 GB por usuario para archivos propios.",
+   priceMin:129,priceMax:200,latam:false,trial:"Demo 7 días completa (sin tarjeta)",highlight:"Demo 7 días sin tarjeta ✓",
+   profiles:["autonomo","pequeno"],
+   llm:"GPT (OpenAI) especializado y ajustado para Derecho español",
+   baseData:"Base documental Iberley Colex: BOE + jurisprudencia + legislación. 5 GB por usuario.",
+   compliance:"RGPD · LOPDGDD",
+   sourceUrl:"https://www.iberley.es/iberley-ia",
+   features:{investigacion:3,redaccion:4,prediccion:1,contratos:3,multimodal:1,personalizacion:3,latamCoverage:1,api:2},
+   strengths:["Demo 7 días completa sin tarjeta — la mejor forma de probar antes de comprar","5 GB almacenamiento personal por usuario para archivos y proyectos propios","Redacción, consultas, traducción jurídica, análisis y estrategia procesal en un entorno","App móvil disponible. Actualización diaria del fondo documental."],
+   weaknesses:["Sin precio público. Base documental más pequeña que los grandes editores.","Sin predicción judicial avanzada ni jurimetría","Sin LATAM ni cobertura internacional"],
+   products:["Demo 7 días — acceso completo ✓ (sin tarjeta)","Iberley IA — copiloto GPT especializado en Derecho español","5 GB almacenamiento personal por usuario","Iberley Jurídico — plan profesional con base datos completa + IA","App móvil Iberley — acceso multidispositivo"]}
+];
+
+// ── STATE ─────────────────────────────────────────────────────────
+let state={
+  profile:"all",budget:"all",need:"all",
+  expandedId:null,
+  compareList:[],
+  chartSelectedIds:["aranzadi","maite","vlex"],
+  radarChart:null,barChart:null,
+  currentTab:"comparador"
+};
+
+// ── AUTH ──────────────────────────────────────────────────────────
+document.getElementById("login-pass").addEventListener("keydown",e=>{if(e.key==="Enter")doLogin();});
+document.getElementById("login-user").addEventListener("keydown",e=>{if(e.key==="Enter")doLogin();});
+function doLogin(){
+  const u=document.getElementById("login-user").value.trim().toLowerCase();
+  const p=document.getElementById("login-pass").value.trim();
+  const err=document.getElementById("login-err");
+  if(u==="legal"&&p==="2026"){
+    document.getElementById("login-screen").style.display="none";
+    document.getElementById("app").style.display="block";
+    renderComparador();renderFuentes();
+  } else {
+    err.textContent="Usuario o contraseña incorrectos.";
+    err.style.display="block";
+  }
+}
+function doLogout(){
+  document.getElementById("login-screen").style.display="flex";
+  document.getElementById("app").style.display="none";
+  document.getElementById("login-user").value="";
+  document.getElementById("login-pass").value="";
+  document.getElementById("login-err").style.display="none";
+  state.compareList=[];state.expandedId=null;
+}
+function toggleHint(){
+  const b=document.getElementById("hint-box");
+  b.style.display=b.style.display==="none"?"block":"none";
+}
+
+// ── TABS ──────────────────────────────────────────────────────────
+function switchTab(id,btn){
+  document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+  if(btn)btn.classList.add("active");
+  ["comparador","graficos","fuentes","ayuda"].forEach(t=>{
+    document.getElementById("tab-"+t).style.display=t===id?"block":"none";
+  });
+  state.currentTab=id;
+  if(id==="graficos")renderCharts();
+  if(id==="ayuda")renderAyuda();
+}
+function goToCharts(){
+  state.chartSelectedIds=[...state.compareList];
+  document.querySelectorAll(".tab-btn")[1].click();
+}
+
+// ── HELPERS ───────────────────────────────────────────────────────
+function dots(value,size=7){
+  let h="";
+  for(let i=0;i<5;i++){
+    const on=i<value;
+    h+=`<div class="dot ${on?"on":"off"}" style="width:${size}px;height:${size}px"></div>`;
+  }
+  return `<div class="dots">${h}</div>`;
+}
+
+// ── COMPARADOR TAB ────────────────────────────────────────────────
+function getFiltered(){
+  return PLATFORMS.filter(p=>{
+    const {profile,budget,need}=state;
+    if(profile!=="all"&&!p.profiles.includes(profile))return false;
+    if(budget==="100"&&p.priceMin>100)return false;
+    if(budget==="100-200"&&(p.priceMin>200||p.priceMax<100))return false;
+    if(budget==="200+"&&p.priceMax<200)return false;
+    if(need!=="all"&&p.features[need]<3)return false;
+    return true;
+  });
+}
+
+function renderComparador(){
+  const filtered=getFiltered();
+  const {expandedId,compareList}=state;
+  const tab=document.getElementById("tab-comparador");
+
+  const profileOpts=[
+    {id:"all",label:"Todos los perfiles"},{id:"autonomo",label:"Abogado/a autónomo/a"},
+    {id:"pequeno",label:"Despacho pequeño (2-10)"},{id:"mediano",label:"Despacho mediano (10-50)"},
+    {id:"litigacion",label:"Litigación intensiva"},{id:"corporativo",label:"Dpto. legal corporativo"},
+    {id:"grandes",label:"Grande firma / sector público"},{id:"internacional",label:"Práctica internacional"},
+    {id:"publico",label:"Administración Pública"},{id:"latam",label:"Práctica en LATAM"}
+  ];
+  const budgetOpts=[
+    {id:"all",label:"Cualquier precio"},{id:"100",label:"Hasta 100 €/mes"},
+    {id:"100-200",label:"100 – 200 €/mes"},{id:"200+",label:"Más de 200 €/mes"}
+  ];
+  const needOpts=[
+    {id:"all",label:"Cualquier necesidad"},{id:"investigacion",label:"Investigación jurisprudencial"},
+    {id:"redaccion",label:"Redacción y documentos"},{id:"prediccion",label:"Predicción judicial"},
+    {id:"contratos",label:"Gestión contractual (CLM)"},{id:"multimodal",label:"Audio y vídeo"},
+    {id:"latamCoverage",label:"Cobertura LATAM"},{id:"api",label:"API e integraciones"}
+  ];
+
+  function sel(opts,val,onch){
+    return `<select onchange="${onch}" style="font-size:12px;padding:5px 10px;border:1px solid #cdd5e0;border-radius:6px;background:#fff;cursor:pointer;font-family:inherit">
+      ${opts.map(o=>`<option value="${o.id}"${o.id===val?" selected":""}>${o.label}</option>`).join("")}
+    </select>`;
+  }
+
+  const bannerDisplay=compareList.length>=2?"flex":"none";
+  const cmpCountText=compareList.length>=2?`<div class="cmp-banner" style="display:${bannerDisplay}">
+    <span class="cmp-banner-text">${compareList.length} plataformas seleccionadas para comparar</span>
+    <button class="cmp-go-btn" onclick="goToCharts()">Ver análisis gráfico →</button>
+  </div>`:"";
+
+  // Cards
+  let cardsHTML="";
+  if(filtered.length===0){
+    cardsHTML=`<div class="span-full">Ninguna plataforma coincide con los filtros.<br>
+      <button onclick="clearFilters()" style="margin-top:10px;font-size:12px;cursor:pointer;padding:4px 10px;border:1px solid #dde3ee;border-radius:6px;font-family:inherit;background:#fff">Limpiar filtros</button>
+    </div>`;
+  } else {
+    filtered.forEach(p=>{
+      const c=PC[p.color];
+      const inCmp=compareList.includes(p.id);
+      const isExp=expandedId===p.id;
+      const canAdd=compareList.length<3;
+      cardsHTML+=`
+        <div class="card${isExp?" expanded":""}${inCmp?" in-compare":""}" id="card-${p.id}">
+          <div class="card-body">
+            <div class="card-header">
+              <div class="card-initials" style="background:${c.bg};color:${c.text};border:1px solid ${c.bd}">${p.initials}</div>
+              <div style="flex:1;min-width:0">
+                <div class="card-name">${p.name}</div>
+                <div class="card-product">${p.product}</div>
+              </div>
+              ${p.latam?`<span class="latam-badge">LATAM</span>`:""}
+            </div>
+            <div class="price-row">
+              <span class="price-main">${p.priceDisplay}</span>
+              <span class="price-trial">${p.trial}</span>
+            </div>
+            <span class="highlight-badge" style="background:${c.bg};color:${c.text};border:1px solid ${c.bd}">${p.highlight}</span>
+            <p class="card-tagline">${p.strengths[0]}</p>
+            <div class="mini-features">
+              ${FM.slice(0,4).map(f=>`
+                <div class="mini-feat-row">
+                  <span class="mini-feat-label">${f.label}</span>
+                  ${dots(p.features[f.key])}
+                </div>`).join("")}
+            </div>
+          </div>
+          <div class="card-footer">
+            <button class="detail-btn${isExp?" active":""}" onclick="toggleExpand('${p.id}')">${isExp?"✕ Cerrar":"Ver detalle →"}</button>
+            <button class="compare-btn${inCmp?" active":""}" onclick="toggleCompare('${p.id}')" ${!inCmp&&!canAdd?"disabled":""}>
+              ${inCmp?"✓ Selec.":"+ Comparar"}
+            </button>
+          </div>
+        </div>`;
+      if(isExp){
+        cardsHTML+=`<div class="detail-panel" style="grid-column:1/-1">${renderDetail(p)}</div>`;
+      }
+    });
+  }
+
+  tab.innerHTML=`
+    <div class="filters">
+      ${sel(profileOpts,state.profile,"onProfileChange(this.value)")}
+      ${sel(budgetOpts,state.budget,"onBudgetChange(this.value)")}
+      ${sel(needOpts,state.need,"onNeedChange(this.value)")}
+      <span class="filter-count">${filtered.length} plataforma${filtered.length!==1?"s":""}</span>
+      ${state.profile!=="all"||state.budget!=="all"||state.need!=="all"?
+        `<button class="clear-filters" onclick="clearFilters()">Limpiar filtros</button>`:""}
+    </div>
+    ${cmpCountText}
+    <div class="cards-grid">${cardsHTML}</div>
+    <div class="price-legend">
+      <span><span class="legend-confirmed">✓</span> Precio oficial publicado</span>
+      <span><span class="legend-est">~</span> Estimación de mercado</span>
+      <span class="legend-author">© Joaquín Rieta · joaquinrieta.com · Marzo 2026</span>
+    </div>`;
+
+  updateCmpIndicator();
+}
+
+function renderDetail(p){
+  const c=PC[p.color];
+  return `
+    <div class="detail-header">
+      <div class="detail-initials" style="background:${c.bg};color:${c.text};border:1px solid ${c.bd}">${p.initials}</div>
+      <div>
+        <div class="detail-name">${p.name}</div>
+        <div class="detail-product">${p.product}</div>
+      </div>
+      <div class="detail-price-block">
+        <div class="detail-price-main">${p.priceDisplay}</div>
+        <div class="detail-price-note">${p.priceNote}</div>
+        <a href="${p.sourceUrl}" target="_blank" class="detail-source">Fuente oficial →</a>
+      </div>
+      <button class="detail-close" onclick="toggleExpand('${p.id}')">✕ Cerrar</button>
+    </div>
+    <div class="detail-divider"></div>
+    <div class="two-col">
+      <div>
+        <div class="section-label" style="color:#27500A">FORTALEZAS</div>
+        ${p.strengths.map(s=>`<div class="feat-row"><span class="feat-icon plus">+</span><span class="feat-text">${s}</span></div>`).join("")}
+      </div>
+      <div>
+        <div class="section-label" style="color:#a32d2d">LIMITACIONES</div>
+        ${p.weaknesses.map(w=>`<div class="feat-row"><span class="feat-icon minus">−</span><span class="feat-text">${w}</span></div>`).join("")}
+      </div>
+    </div>
+    <div class="two-col">
+      <div class="tech-box">
+        <div class="section-label" style="color:#556">TECNOLOGÍA Y CUMPLIMIENTO</div>
+        ${[["Motor IA",p.llm],["Base de datos",p.baseData],["Seguridad",p.compliance]].map(([l,v])=>`
+          <div class="tech-item"><span class="tech-label">${l}</span><span class="tech-value">${v}</span></div>`).join("")}
+      </div>
+      <div>
+        <div class="section-label" style="color:#556">PRODUCTOS Y PLANES</div>
+        ${p.products.map(pr=>`<div class="product-item"><span class="product-arrow">›</span><span class="product-text">${pr}</span></div>`).join("")}
+      </div>
+    </div>
+    <div>
+      <div class="section-label" style="color:#556">CAPACIDADES (1 básico → 5 líder)</div>
+      <div class="caps-grid">
+        ${FM.map(f=>`<div class="cap-cell"><div class="cap-label">${f.label}</div>${dots(p.features[f.key],5)}</div>`).join("")}
+      </div>
+    </div>`;
+}
+
+// ── FILTER HANDLERS ───────────────────────────────────────────────
+function onProfileChange(v){state.profile=v;state.expandedId=null;renderComparador();}
+function onBudgetChange(v){state.budget=v;state.expandedId=null;renderComparador();}
+function onNeedChange(v){state.need=v;state.expandedId=null;renderComparador();}
+function clearFilters(){state.profile="all";state.budget="all";state.need="all";renderComparador();}
+
+function toggleExpand(id){
+  state.expandedId=state.expandedId===id?null:id;
+  renderComparador();
+}
+
+function toggleCompare(id){
+  const idx=state.compareList.indexOf(id);
+  if(idx>=0)state.compareList.splice(idx,1);
+  else if(state.compareList.length<3)state.compareList.push(id);
+  renderComparador();
+  updateAnalyzeBtn();
+}
+function clearCompare(){state.compareList=[];renderComparador();updateAnalyzeBtn();}
+
+function updateCmpIndicator(){
+  const el=document.getElementById("cmp-indicator");
+  const cnt=document.getElementById("cmp-count");
+  const n=state.compareList.length;
+  el.style.display=n>0?"flex":"none";
+  cnt.textContent=n;
+}
+function updateAnalyzeBtn(){
+  const btn=document.getElementById("analyze-btn");
+  const n=state.compareList.length;
+  btn.style.display=n>=2?"inline-block":"none";
+  btn.textContent=`Ver análisis ${n} →`;
+}
+
+// ── CHARTS TAB ────────────────────────────────────────────────────
+function renderCharts(){
+  const tab=document.getElementById("tab-graficos");
+  const sel=state.chartSelectedIds;
+
+  const selectorHTML=`
+    <div class="chart-selector">
+      <div class="chart-selector-label">SELECCIONA HASTA 3 PLATAFORMAS</div>
+      <div class="chart-selector-btns">
+        ${PLATFORMS.map(p=>{
+          const on=sel.includes(p.id);
+          const c=PC[p.color];
+          return `<button class="cs-btn${on?" active":""}" onclick="toggleChartSel('${p.id}')"
+            style="background:${on?c.bg:"#fff"};color:${on?c.text:"#556"};border:${on?`1.5px solid ${c.bd}`:"1px solid #cdd5e0"};opacity:${!on&&sel.length>=3?0.35:1};font-weight:${on?700:400}">
+            ${on?"✓ ":""}<span>${p.short}</span>
+          </button>`;
+        }).join("")}
+      </div>
+    </div>`;
+
+  const plats=PLATFORMS.filter(p=>sel.includes(p.id));
+
+  tab.innerHTML=selectorHTML+`
+    <div class="radar-info">
+      <div class="radar-info-title">Cómo leer el gráfico radar</div>
+      <div class="radar-info-grid">
+        <div class="radar-info-item"><span class="radar-num">1.</span><span>Cada eje representa una <strong>dimensión de capacidad</strong> (Investigación, Redacción, Predicción...).</span></div>
+        <div class="radar-info-item"><span class="radar-num">2.</span><span>Cuanto más <strong>alejado del centro</strong>, mayor es la puntuación (escala 1-5).</span></div>
+        <div class="radar-info-item"><span class="radar-num">3.</span><span>El <strong>área coloreada</strong> muestra el perfil completo de cada plataforma de un vistazo.</span></div>
+        <div class="radar-info-item"><span class="radar-num">4.</span><span><strong>Especializada</strong> = picos en pocos ejes. <strong>Generalista</strong> = área total mayor.</span></div>
+      </div>
+    </div>
+    ${plats.length>0?`
+    <div class="chart-card">
+      <div class="chart-accent-left"><div class="accent-bar" style="background:#0C447C"></div><div class="chart-card-title">Análisis de capacidades — radar</div></div>
+      <div class="chart-card-sub">Cuanto mayor el área, mayor cobertura funcional. Los picos revelan especializaciones.</div>
+      <div class="chart-canvas-wrap"><canvas id="radar-canvas"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-accent-left"><div class="accent-bar" style="background:#0C447C"></div><div class="chart-card-title">Tabla de capacidades detallada</div></div>
+      <div class="chart-card-sub">Puntuación 1-5 basada en análisis propio de funcionalidades publicadas.</div>
+      <div style="overflow-x:auto">${renderCapTable(plats)}</div>
+    </div>`:""}
+    <div class="chart-card">
+      <div class="chart-accent-left"><div class="accent-bar" style="background:#BA7517"></div><div class="chart-card-title">Precios de entrada comparados</div></div>
+      <div class="chart-card-sub">Precio mínimo por plataforma · azul = precio oficial ✓ · gris = estimación</div>
+      <div class="chart-canvas-wrap"><canvas id="bar-canvas"></canvas></div>
+      <div class="bar-legend">
+        <div class="bar-legend-item"><div class="bar-legend-dot" style="background:#0C447C"></div>Precio oficial publicado ✓</div>
+        <div class="bar-legend-item"><div class="bar-legend-dot" style="background:#B4B2A9"></div>Estimación de mercado</div>
+      </div>
+    </div>`;
+
+  // Destroy old charts
+  if(state.radarChart){state.radarChart.destroy();state.radarChart=null;}
+  if(state.barChart){state.barChart.destroy();state.barChart=null;}
+
+  setTimeout(()=>{
+    if(plats.length>0){
+      const rctx=document.getElementById("radar-canvas");
+      if(rctx){
+        state.radarChart=new Chart(rctx,{
+          type:"radar",
+          data:{
+            labels:FM.map(f=>f.label),
+            datasets:plats.map(p=>({
+              label:p.short,
+              data:FM.map(f=>p.features[f.key]),
+              backgroundColor:CC[p.id]+"26",
+              borderColor:CC[p.id],
+              borderWidth:2,
+              pointBackgroundColor:CC[p.id],
+              pointRadius:3
+            }))
+          },
+          options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:11},color:"#445"}}},scales:{r:{min:0,max:5,ticks:{display:false},grid:{color:"#dde3ee"},pointLabels:{font:{size:10},color:"#667"}}}}
+        });
+      }
+    }
+    const bctx=document.getElementById("bar-canvas");
+    if(bctx){
+      const barData=PLATFORMS.map(p=>({name:p.short,price:p.priceMin,ok:p.priceDisplay.includes("✓")})).sort((a,b)=>a.price-b.price);
+      state.barChart=new Chart(bctx,{
+        type:"bar",
+        data:{
+          labels:barData.map(d=>d.name),
+          datasets:[{
+            label:"Precio mínimo (€/mes)",
+            data:barData.map(d=>d.price),
+            backgroundColor:barData.map(d=>d.ok?"#0C447C":"#B4B2A9"),
+            borderRadius:4
+          }]
+        },
+        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${Math.round(c.raw)} €/mes`}}},scales:{x:{grid:{display:false},ticks:{font:{size:10},color:"#889"}},y:{grid:{color:"#f0f4f8"},ticks:{font:{size:10},color:"#889"},callback:v=>`${v}€`}}}
+      });
+    }
+  },50);
+}
+
+function renderCapTable(plats){
+  const headCols=plats.map(p=>{const c=PC[p.color];return`<th class="data-col" style="background:${c.bg};color:${c.text};border-bottom:2px solid ${c.bd}">${p.short}</th>`;}).join("");
+  const rows=FM.map((f,i)=>{
+    const bg=i%2===0?"#f4f6fb":"#fff";
+    const cells=plats.map(p=>`<td style="text-align:center;background:${bg};padding:9px 10px"><div style="display:flex;justify-content:center">${dots(p.features[f.key])}</div></td>`).join("");
+    return`<tr><td class="name-cell" style="background:${bg};padding:9px 10px;font-size:11px;color:#445">${f.label}</td>${cells}</tr>`;
+  }).join("");
+  return`<table class="cap-table">
+    <thead><tr><th class="name-col" style="color:#889;font-size:10px;font-weight:700;letter-spacing:.6px;text-align:left;padding:8px 10px">CAPACIDAD</th>${headCols}</tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
+
+function toggleChartSel(id){
+  const idx=state.chartSelectedIds.indexOf(id);
+  if(idx>=0)state.chartSelectedIds.splice(idx,1);
+  else if(state.chartSelectedIds.length<3)state.chartSelectedIds.push(id);
+  renderCharts();
+}
+
+// ── HELP TAB ──────────────────────────────────────────────────────
+function renderAyuda(){
+  const tab=document.getElementById("tab-ayuda");
+  if(tab.innerHTML.trim()!=="")return;
+
+  const steps=[
+    {n:"1",title:"Filtra por tu perfil",body:"Usa los tres desplegables superiores para filtrar por <strong>perfil profesional</strong> (autónomo, despacho pequeño, litigación...), <strong>presupuesto</strong> y <strong>necesidad prioritaria</strong> (investigación, redacción, predicción, LATAM...). Las tarjetas se actualizan al instante.",tip:"Consejo: empieza filtrando por perfil"},
+    {n:"2",title:"Explora las tarjetas",body:"Cada tarjeta muestra el nombre, precio, diferencial clave y las 4 primeras capacidades con puntos. <strong>Más puntos rellenos = mayor capacidad</strong> en esa dimensión (escala 1 a 5). El badge de color indica la especialización principal de cada plataforma.",tip:"Los precios con ✓ son oficiales"},
+    {n:"3",title:"Abre el detalle inline",body:'Pulsa <strong>"Ver detalle →"</strong> en cualquier tarjeta. El panel de detalle se abre <em>justo debajo</em>, sin cambiar de pantalla. Verás fortalezas, limitaciones, tecnología, productos y las 8 capacidades completas. Pulsa <strong>"✕ Cerrar"</strong> para volver.',tip:"El detalle aparece inline, no al final"},
+    {n:"4",title:"Selecciona para comparar",body:'Pulsa <strong>"+ Comparar"</strong> en hasta 3 plataformas. Aparecerá un contador en la barra de pestañas y un banner dorado con el botón <strong>"Ver análisis gráfico →"</strong>. Pulsa ese botón para ir directamente al análisis con tus plataformas elegidas.',tip:"Máximo 3 plataformas simultáneas"},
+    {n:"5",title:"Analiza con gráficos",body:"En la pestaña <strong>Análisis gráfico</strong> encontrarás: el gráfico <strong>radar</strong> de 8 dimensiones (cuanto más área, más cobertura), la <strong>tabla de capacidades</strong> detallada lado a lado, y el gráfico de <strong>barras de precios</strong>. Puedes cambiar la selección de plataformas en cualquier momento.",tip:"Cambia la selección sin salir"},
+    {n:"6",title:"Consulta fuentes y avisos",body:"La pestaña <strong>Fuentes y metodología</strong> contiene: la metodología de elaboración del comparador, los enlaces directos a la web oficial de cada proveedor, y el <strong>aviso legal profesional</strong> sobre el uso responsable de IA jurídica (obligada lectura).",tip:"Verifica siempre en la fuente oficial"},
+  ];
+
+  const stepsHTML=steps.map(s=>`
+    <div class="help-step">
+      <div class="step-num">${s.n}</div>
+      <div class="step-title">${s.title}</div>
+      <div class="step-body">${s.body}</div>
+      <span class="step-tip">${s.tip}</span>
+    </div>`).join("");
+
+  const faqs=[
+    {q:"¿Los precios son definitivos?",a:'Los precios marcados con <strong>✓</strong> están publicados oficialmente en la web del proveedor y son fiables. Los precios sin ✓ son estimaciones de mercado — contacta directamente con el proveedor para la tarifa exacta. La mayoría de plataformas grandes no publica sus precios y solo opera bajo propuesta comercial.'},
+    {q:"¿Qué significan los puntos de capacidad?",a:"Son valoraciones propias basadas en análisis comparativo de las funcionalidades publicadas por cada proveedor. La escala es de 1 (básico o ausente) a 5 (líder en esa dimensión). No son datos declarados por los proveedores ni certificaciones oficiales."},
+    {q:"¿Puedo comparar más de 3 plataformas?",a:'No directamente en el modo comparativa. El límite de 3 permite un análisis visual claro en el radar. Para comparar más, selecciona un grupo de 3, analiza, y luego cambia la selección. El botón <strong>"Limpiar"</strong> en la barra de pestañas resetea la selección.'},
+    {q:"¿Puedo usar esta herramienta sin conexión?",a:"El archivo HTML funciona sin conexión para toda la interfaz y los datos. Solo los gráficos (Chart.js) requieren conexión a internet para cargarse desde CDN. Si abres el archivo sin conexión y los gráficos no aparecen, es normal — el resto funciona perfectamente."},
+    {q:"¿Qué significa la cobertura LATAM?",a:"Indica que la plataforma tiene presencia activa en países latinoamericanos con contenido jurídico local nativo (legislación, jurisprudencia, equipos editoriales propios). No significa solo que esté disponible en español — sino que tiene datos jurídicos locales verificados de esos países."},
+    {q:"¿Con qué frecuencia se actualiza este comparador?",a:"Los datos reflejan el estado de cada plataforma en marzo de 2026. El sector de IA jurídica evoluciona rápidamente — se recomienda verificar directamente con cada proveedor antes de tomar decisiones de contratación."},
+  ];
+
+  const faqHTML=faqs.map(f=>`
+    <div class="help-qa">
+      <div class="help-q"><span class="help-q-icon">Q</span><span>${f.q}</span></div>
+      <div class="help-a">${f.a}</div>
+    </div>`).join("");
+
+  const legends=[
+    {label:"✓ Precio oficial",bg:"#EAF3DE",text:"#27500A",bd:"#97C459",desc:"Tarifa publicada oficialmente en la web del proveedor"},
+    {label:"~ Estimación",bg:"#FAEEDA",text:"#633806",bd:"#EF9F27",desc:"Precio orientativo basado en análisis de mercado"},
+    {label:"LATAM",bg:"#EAF3DE",text:"#27500A",bd:"#97C459",desc:"Plataforma con contenido jurídico nativo en Latinoamérica"},
+    {label:"Ver detalle →",bg:"#E6F1FB",text:"#0C447C",bd:"#85B7EB",desc:"Abre el panel de información completa de esa plataforma"},
+    {label:"+ Comparar",bg:"#FAEEDA",text:"#854F0B",bd:"#BA7517",desc:"Añade la plataforma a la comparativa gráfica (máx. 3)"},
+    {label:"✓ Selec.",bg:"#FAEEDA",text:"#854F0B",bd:"#BA7517",desc:"Plataforma ya incluida en la selección de comparativa"},
+  ];
+
+  const legendHTML=legends.map(l=>`
+    <div class="legend-item">
+      <span class="legend-badge" style="background:${l.bg};color:${l.text};border:1px solid ${l.bd}">${l.label}</span>
+      <span class="legend-desc">${l.desc}</span>
+    </div>`).join("");
+
+  tab.innerHTML=`
+    <div class="help-hero">
+      <svg width="44" height="44" viewBox="0 0 28 28" fill="none" style="flex-shrink:0">
+        <rect x="13" y="1" width="2" height="25" rx="1" fill="#EF9F27"/>
+        <rect x="0" y="9" width="28" height="2" rx="1" fill="#EF9F27"/>
+        <rect x="7" y="26" width="14" height="2" rx="1" fill="#EF9F27"/>
+        <path d="M 7 11 L 3 20 L 11 20 Z" fill="none" stroke="#EF9F27" stroke-width="1.5" stroke-linejoin="round"/>
+        <path d="M 21 11 L 17 20 L 25 20 Z" fill="none" stroke="#EF9F27" stroke-width="1.5" stroke-linejoin="round"/>
+      </svg>
+      <div class="help-hero-text">
+        <div class="help-hero-title">Guía de uso del Comparador IA Jurídica</div>
+        <div class="help-hero-sub">Sigue los 6 pasos para sacar el máximo partido a la herramienta · Desarrollado por Joaquín Rieta · joaquinrieta.com</div>
+      </div>
+    </div>
+
+    <div class="help-steps">${stepsHTML}</div>
+
+    <div class="help-section accent">
+      <div class="help-section-title">
+        <div class="help-section-icon">?</div>
+        Preguntas frecuentes
+      </div>
+      ${faqHTML}
+    </div>
+
+    <div class="help-section">
+      <div class="help-section-title">
+        <div class="help-section-icon" style="font-size:9px">ABC</div>
+        Leyenda de elementos
+      </div>
+      <div class="help-legend-grid">${legendHTML}</div>
+    </div>
+
+    <div class="help-section">
+      <div class="help-section-title">
+        <div class="help-section-icon">i</div>
+        Información técnica
+      </div>
+      <div class="help-shortcut-grid">
+        <div class="shortcut-item"><span class="shortcut-key">Doble clic</span> Abre la app en el navegador</div>
+        <div class="shortcut-item"><span class="shortcut-key">Conexión</span> Solo necesaria para gráficos</div>
+        <div class="shortcut-item"><span class="shortcut-key">Usuario</span> legal</div>
+        <div class="shortcut-item"><span class="shortcut-key">Contraseña</span> 2026</div>
+        <div class="shortcut-item"><span class="shortcut-key">Datos</span> Verificados marzo 2026</div>
+        <div class="shortcut-item"><span class="shortcut-key">Plataformas</span> 8 analizadas</div>
+        <div class="shortcut-item"><span class="shortcut-key">Fuente</span> Webs oficiales de cada proveedor</div>
+        <div class="shortcut-item"><span class="shortcut-key">Autor</span> Joaquín Rieta · joaquinrieta.com</div>
+      </div>
+    </div>`;
+}
+function renderFuentes(){
+  const sourceRows=PLATFORMS.map((p,i)=>{
+    const c=PC[p.color];
+    return`<div class="source-row" style="${i===0?"border-top:none":""}">
+      <div class="source-initials" style="background:${c.bg};color:${c.text};border:1px solid ${c.bd}">${p.initials}</div>
+      <div>
+        <div class="source-name">${p.name}</div>
+        <a href="${p.sourceUrl}" target="_blank" class="source-url">${p.sourceUrl}</a>
+        <div class="source-meta">Precio: ${p.priceDisplay.includes("✓")?"Confirmado oficialmente en la web del proveedor":"Estimación de mercado (no publicado oficialmente)"} · ${p.compliance.split("·")[0].trim()}</div>
+      </div>
+    </div>`;
+  }).join("");
+
+  document.getElementById("tab-fuentes").innerHTML=`
+
+    <!-- DECLARACIÓN DE INDEPENDENCIA -->
+    <div class="sources-section" style="background:#fff7e6;border-color:#BA7517;border-left:4px solid #BA7517">
+      <div class="sources-title" style="color:#854F0B">⚠ Declaración de independencia y limitaciones</div>
+      <p class="sources-text" style="color:#633806;font-weight:600;margin-bottom:12px">
+        Esta herramienta es una guía de apoyo orientativa para ayudar al profesional jurídico a conocer el panorama de plataformas de IA. No es ni pretende ser una recomendación definitiva de contratación. Toda decisión debe ser adoptada tras supervisión directa de la información, verificación actualizada con cada proveedor y análisis del caso concreto.
+      </p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:11px;color:#633806">
+        <div style="display:flex;gap:8px"><span style="font-weight:700;flex-shrink:0">Sin patrocinio:</span><span>Este comparador ha sido elaborado de forma completamente independiente. No existe acuerdo de patrocinio ni compensación económica con ninguna de las 8 plataformas analizadas.</span></div>
+        <div style="display:flex;gap:8px"><span style="font-weight:700;flex-shrink:0">Sin remuneración:</span><span>El autor no ha recibido ningún tipo de contraprestación económica, descuento, acceso privilegiado ni beneficio en especie de ninguna de las plataformas incluidas en el comparador.</span></div>
+        <div style="display:flex;gap:8px"><span style="font-weight:700;flex-shrink:0">Selección objetiva:</span><span>Las 8 plataformas han sido seleccionadas por tener presencia verificada y activa en el mercado jurídico español y/o latinoamericano a marzo de 2026. La selección no implica ningún juicio de valor sobre plataformas no incluidas.</span></div>
+        <div style="display:flex;gap:8px"><span style="font-weight:700;flex-shrink:0">Fecha y caducidad:</span><span>Los datos son válidos a marzo de 2026. El mercado de IA jurídica evoluciona rápidamente. Los precios, funcionalidades y posicionamiento pueden haber cambiado en el momento de la consulta.</span></div>
+      </div>
+    </div>
+
+    <!-- METODOLOGÍA -->
+    <div class="sources-section blue-accent">
+      <div class="sources-title">Metodología y criterios de análisis</div>
+      <p class="sources-text">Este comparador ha sido elaborado mediante consulta directa de las páginas web oficiales de cada proveedor, complementada con fuentes sectoriales verificadas (Confilegal, Derecho Práctico, El Referente y otros medios especializados en legaltech español). Todos los datos se han verificado en marzo de 2026. La verificación se ha realizado con criterios de rigor periodístico e imparcialidad técnica.</p>
+
+      <div style="font-size:11px;font-weight:700;color:#556;letter-spacing:.7px;margin-bottom:10px">CRITERIOS APLICADOS</div>
+      <div class="method-grid">
+        ${[
+          ["Precios ✓","Publicados y visibles en la web oficial del proveedor · verificados accediendo directamente al precio en la página de tarifas"],
+          ["Precios ~","Estimaciones basadas en análisis de mercado, fuentes sectoriales o declaraciones en entrevistas · no verificables directamente"],
+          ["Capacidades 1-5","Valoración analítica propia basada en funcionalidades publicadas · no son métricas objetivas ni están avaladas por los proveedores"],
+          ["Certificaciones","Solo se recogen las confirmadas en la web oficial del proveedor o en comunicado oficial verificable"],
+          ["Fortalezas/Limitaciones","Análisis independiente · las fortalezas no son material de marketing del proveedor · las limitaciones son el resultado del análisis comparativo"],
+          ["Cobertura LATAM","Solo se marca cuando el proveedor tiene contenido jurídico nativo local verificado · no cuando solo ofrece el producto en español"]
+        ].map(([k,v])=>`<div class="method-item"><span class="method-key">${k}</span><span>${v}</span></div>`).join("")}
+      </div>
+
+      <div style="margin-top:16px;padding:12px 14px;background:#f4f6fb;border-radius:8px;border-left:3px solid #0C447C;font-size:11px;color:#445;line-height:1.7">
+        <strong style="color:#1a1a2e">Advertencia sobre métricas autodeclaradas por proveedores:</strong> Algunos datos estadísticos citados en las fichas de plataformas (por ejemplo, ratios de fiabilidad, porcentajes de ahorro de costes, mejoras de productividad) son <strong>métricas autodeclaradas por los propios proveedores</strong> en sus materiales de marketing o en pruebas controladas propias. No han sido auditadas por terceros independientes y el autor no puede certificar su reproducibilidad. Estos datos se incluyen a título informativo y deben ser tratados como afirmaciones comerciales del proveedor, no como hechos verificados externamente.
+      </div>
+    </div>
+
+    <!-- FUENTES POR PLATAFORMA -->
+    <div class="sources-section">
+      <div class="sources-title">Fuentes verificadas por plataforma</div>
+      <p class="sources-text" style="margin-bottom:14px">Cada plataforma ha sido verificada accediendo directamente a su web oficial. Los enlaces recogen el estado a marzo de 2026. Se recomienda acceder a las fuentes antes de tomar cualquier decisión.</p>
+      ${sourceRows}
+    </div>
+
+    <!-- FUENTES SECUNDARIAS -->
+    <div class="sources-section">
+      <div class="sources-title">Fuentes sectoriales y de contraste</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:11px;color:#445">
+        ${[
+          {t:"Medios especializados España",items:["Confilegal · confilegal.com","Derecho Práctico · derechopractico.es","El Referente · elreferente.es","Noticias Jurídicas · noticias.juridicas.com"]},
+          {t:"Informes internacionales de referencia",items:["Thomson Reuters — State of the Legal Market 2024","Wolters Kluwer — Future Ready Lawyer 2025","McKinsey — Economic Potential of Generative AI 2023","WEF — Future of Jobs Report 2025"]},
+          {t:"Normativa de cumplimiento citada",items:["Reglamento (UE) 2024/1689 — AI Act (en vigor)","Reglamento (UE) 2016/679 — RGPD","LOPDGDD — Ley Orgánica 3/2018","AEPD — Orientaciones IA Agéntica V1.2 (2025)"]},
+          {t:"Limitaciones de las fuentes",items:["La mayoría de plataformas no publica tarifas → estimaciones de mercado","Las métricas de rendimiento son autodeclaradas por los proveedores","La selección de 8 plataformas es editorial, no exhaustiva","Las certificaciones ISO pueden variar o actualizarse sin aviso"]}
+        ].map(s=>`<div style="background:#f4f6fb;border-radius:8px;padding:12px 14px">
+          <div style="font-weight:700;color:#1a1a2e;margin-bottom:8px">${s.t}</div>
+          ${s.items.map(i=>`<div style="display:flex;gap:6px;margin-bottom:4px"><span style="color:#0C447C;flex-shrink:0">›</span><span>${i}</span></div>`).join("")}
+        </div>`).join("")}
+      </div>
+    </div>
+
+    <!-- AVISO LEGAL COMPLETO -->
+    <div class="sources-section blue-accent">
+      <div class="legal-header">
+        <div class="legal-icon">!</div>
+        <div>
+          <div class="legal-icon-title">Aviso legal · Herramienta de apoyo orientativo a la decisión</div>
+          <div class="legal-icon-sub">Lectura obligatoria · Su uso implica la aceptación de estas condiciones</div>
+        </div>
+      </div>
+      ${[
+        ["1. Naturaleza orientativa y no vinculante.","Este comparador constituye exclusivamente una guía de apoyo orientativo elaborada con fines informativos y divulgativos. No tiene naturaleza de asesoramiento jurídico, comercial, técnico ni de ningún otro tipo. Sus contenidos no pueden ser utilizados como base única o determinante para la adopción de decisiones de contratación, inversión o estrategia tecnológica. Toda decisión de contratación de cualquier plataforma de inteligencia artificial debe adoptarse tras un análisis propio, actualizado y adaptado a las circunstancias específicas del despacho o entidad interesada."],
+        ["2. Obligación de verificación directa con el proveedor.","Antes de contratar cualquier plataforma, el interesado tiene la obligación de verificar directamente con el proveedor la información actualizada sobre precios, funcionalidades, condiciones contractuales, cobertura de datos, cumplimiento normativo (RGPD, AI Act) y cualquier otra condición relevante. Los datos recogidos en este comparador pueden haber variado desde su fecha de verificación (marzo de 2026). El autor no se responsabiliza de las decisiones adoptadas exclusivamente sobre la base de esta herramienta."],
+        ["3. Necesidad de supervisión humana cualificada.","El uso de plataformas de inteligencia artificial jurídica requiere, en todo caso, la supervisión de un profesional del Derecho habilitado. Los outputs de cualquier herramienta de IA (redacciones, análisis, jurisprudencia recuperada, argumentos jurídicos) deben ser revisados, verificados y validados por el profesional responsable antes de su uso en cualquier procedimiento o asesoramiento. La IA no sustituye el juicio profesional ni la responsabilidad deontológica del abogado."],
+        ["4. Obligación de contrastar fuentes y riesgo de alucinaciones.","Los sistemas de inteligencia artificial generativa pueden producir resultados incorrectos, citar normas derogadas, referencias jurisprudenciales inexistentes o razonamientos jurídicamente defectuosos. Este fenómeno, conocido como «alucinación», afecta en mayor o menor medida a todas las plataformas analizadas. El profesional tiene la obligación de contrastar toda cita, referencia normativa o argumento generado por IA con las fuentes primarias oficiales (BOE, CENDOJ, bases de datos jurídicas verificadas) antes de su uso."],
+        ["5. Exactitud de precios y actualización de datos.","Los precios marcados con ✓ han sido verificados directamente en la web oficial del proveedor a marzo de 2026. Los precios marcados con ~ son estimaciones basadas en análisis de mercado y no cuentan con confirmación oficial. Todos los precios y condiciones pueden variar en cualquier momento sin previo aviso. El autor no garantiza que los datos sean exactos, completos o actuales en el momento de la consulta."],
+        ["6. Cumplimiento normativo del uso de IA (AI Act y RGPD).","El uso de herramientas de IA en el ejercicio de la abogacía está sujeto a obligaciones derivadas del Reglamento (UE) 2024/1689 (AI Act), el RGPD, la LOPDGDD y la normativa colegial aplicable. El profesional es responsable de asegurarse de que su uso de estas herramientas cumple con la normativa vigente en cada momento, los principios de secreto profesional, deber de confidencialidad y las directrices deontológicas de su colegio. Este comparador no constituye asesoramiento de cumplimiento normativo."],
+        ["7. Ausencia de responsabilidad del autor.","Joaquín Rieta actúa como investigador y divulgador independiente en la elaboración de este comparador. No asume ninguna responsabilidad por los daños, pérdidas o perjuicios de cualquier naturaleza que pudieran derivarse del uso de esta herramienta o de las decisiones adoptadas en base a su contenido. El uso de este comparador es responsabilidad exclusiva del usuario."]
+      ].map(([t,v])=>`<p class="legal-point"><span class="legal-strong">${t}</span> ${v}</p>`).join("")}
+    </div>
+
+    <!-- AUTHOR -->
+    <div class="author-card">
+      <div class="author-info">
+        <div class="author-avatar">JR</div>
+        <div>
+          <div class="author-full-name">Joaquín Rieta</div>
+          <div class="author-role">Economista (Colegiado COEV nº 8.846) · Consultor estratégico de IA</div>
+          <div style="font-size:10px;color:#889;margin-top:2px">Elaboración independiente</div>
+        </div>
+      </div>
+      <div class="author-links">
+        <a href="https://joaquinrieta.com" target="_blank" class="author-site">joaquinrieta.com</a>
+        <div class="author-date">Investigación y análisis · Versión marzo 2026</div>
+        <div style="font-size:10px;color:#889;margin-top:3px">© Joaquín Rieta · Todos los derechos reservados</div>
+      </div>
+    </div>`;
+}
+</script>
+</body>
+</html>
